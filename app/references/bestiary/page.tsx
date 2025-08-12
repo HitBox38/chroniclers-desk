@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { SearchBox } from "@/components/SearchBox";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { AddMonsterDialog } from "@/components/AddMonsterDialog";
 
 export default function Bestiary() {
   const searchParams = useSearchParams();
@@ -46,7 +47,11 @@ export default function Bestiary() {
         title="Bestiary"
         description="Browse and search through monsters and creatures"
         breadcrumbItems={breadcrumbItems}
-      />
+      >
+        <div className="flex justify-end">
+          <AddMonsterDialog />
+        </div>
+      </PageHeader>
       {monsterId ? (
         // Two-panel layout when a monster is selected
         <main className="mx-auto px-4 pt-6 h-[calc(100vh-200px)]">

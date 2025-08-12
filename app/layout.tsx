@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/themes";
 import { ConvexClientProvider } from "./providers/ConvexClientProvider";
+import { Toaster } from "sonner";
 
 const clerkAppearance = {
   variables: {
@@ -67,6 +68,7 @@ export default async function RootLayout({
                     <div className="flex flex-1 flex-col gap-4">{children}</div>
                   </SidebarInset>
                 </SidebarProvider>
+                <Toaster richColors />
               </ConvexClientProvider>
             </QueryProvider>
           </ThemeProvider>
