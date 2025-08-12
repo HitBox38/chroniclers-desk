@@ -43,19 +43,38 @@ interface MonsterFormProps {
 }
 
 const MONSTER_TYPES = [
-  "Aberration", "Beast", "Celestial", "Construct", "Dragon", "Elemental",
-  "Fey", "Fiend", "Giant", "Humanoid", "Monstrosity", "Ooze", "Plant", "Undead"
+  "Aberration",
+  "Beast",
+  "Celestial",
+  "Construct",
+  "Dragon",
+  "Elemental",
+  "Fey",
+  "Fiend",
+  "Giant",
+  "Humanoid",
+  "Monstrosity",
+  "Ooze",
+  "Plant",
+  "Undead",
 ];
 
 const ALIGNMENTS = [
-  "Lawful Good", "Neutral Good", "Chaotic Good",
-  "Lawful Neutral", "True Neutral", "Chaotic Neutral", 
-  "Lawful Evil", "Neutral Evil", "Chaotic Evil", "Unaligned"
+  "Lawful Good",
+  "Neutral Good",
+  "Chaotic Good",
+  "Lawful Neutral",
+  "True Neutral",
+  "Chaotic Neutral",
+  "Lawful Evil",
+  "Neutral Evil",
+  "Chaotic Evil",
+  "Unaligned",
 ];
 
 const CHALLENGE_RATINGS = [
-  0, 0.125, 0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-  11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+  0, 0.125, 0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+  22, 23, 24, 25, 26, 27, 28, 29, 30,
 ];
 
 export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
@@ -96,9 +115,10 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
     try {
       await createMonster({
         ...data,
+        userName: user.username ?? "Unknown",
         userId: user.id,
       });
-      
+
       toast.success("Monster created successfully!");
       reset();
       onSuccess?.();
@@ -135,11 +155,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    {...register("name")}
-                    placeholder="Monster name"
-                  />
+                  <Input id="name" {...register("name")} placeholder="Monster name" />
                   {errors.name && (
                     <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
                   )}
@@ -150,8 +166,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
                   <select
                     id="type"
                     {...register("type")}
-                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none"
-                  >
+                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none">
                     <option value="">Select type</option>
                     {MONSTER_TYPES.map((type) => (
                       <option key={type} value={type}>
@@ -167,11 +182,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
 
               <div>
                 <Label htmlFor="subtype">Subtype</Label>
-                <Input
-                  id="subtype"
-                  {...register("subtype")}
-                  placeholder="Optional subtype"
-                />
+                <Input id="subtype" {...register("subtype")} placeholder="Optional subtype" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -180,8 +191,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
                   <select
                     id="size"
                     {...register("size")}
-                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none"
-                  >
+                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none">
                     {["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"].map((size) => (
                       <option key={size} value={size}>
                         {size}
@@ -198,8 +208,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
                   <select
                     id="alignment"
                     {...register("alignment")}
-                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none"
-                  >
+                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none">
                     <option value="">Select alignment</option>
                     {ALIGNMENTS.map((alignment) => (
                       <option key={alignment} value={alignment}>
@@ -248,8 +257,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
                   <select
                     id="challengeRating"
                     {...register("challengeRating", { valueAsNumber: true })}
-                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none"
-                  >
+                    className="w-full px-3 py-2 text-sm border border-input bg-background ring-offset-background rounded-md focus:ring-2 focus:ring-ring focus:outline-none">
                     {CHALLENGE_RATINGS.map((cr) => (
                       <option key={cr} value={cr}>
                         {cr}
@@ -290,11 +298,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
 
               <div>
                 <Label htmlFor="speed">Speed *</Label>
-                <Input
-                  id="speed"
-                  {...register("speed")}
-                  placeholder="30 ft."
-                />
+                <Input id="speed" {...register("speed")} placeholder="30 ft." />
                 {errors.speed && (
                   <p className="text-sm text-red-500 mt-1">{errors.speed.message}</p>
                 )}
@@ -317,9 +321,9 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
                   { name: "charisma", label: "Charisma" },
                 ].map(({ name, label }) => {
                   const fieldName = name as keyof MonsterFormData;
-                  const score = watch(fieldName) as number || 10;
+                  const score = (watch(fieldName) as number) || 10;
                   const modifier = calculateAbilityModifier(score);
-                  
+
                   return (
                     <div key={name}>
                       <Label htmlFor={name}>{label} *</Label>
@@ -334,9 +338,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
                         Modifier: {formatModifier(modifier)}
                       </p>
                       {errors[fieldName] && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {errors[fieldName]?.message}
-                        </p>
+                        <p className="text-sm text-red-500 mt-1">{errors[fieldName]?.message}</p>
                       )}
                     </div>
                   );
@@ -350,12 +352,7 @@ export function MonsterForm({ onSuccess, onCancel }: MonsterFormProps) {
       <Separator />
 
       <div className="flex justify-end space-x-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
