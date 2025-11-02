@@ -76,8 +76,15 @@ export default function MonsterView() {
                           <b>Armor Class: </b>
                           {monster.armorClass.map((ac, index) => (
                             <span key={ac.type}>
-                              {ac.value} ({ac.type})
-                              {index !== monster?.armorClass.length - 1 ? ", " : ""}
+                              {ac.value} (
+                              {ac.type === "condition"
+                                ? ac.condition?.name
+                                : ac.type === "spell"
+                                ? `with ${ac.spell?.name}`
+                                : ac.type === "armor"
+                                ? ac.armor?.map((a) => a.name).join(", ")
+                                : ac.type}
+                              ){index !== monster?.armorClass.length - 1 ? ", " : ""}
                             </span>
                           ))}
                         </p>
