@@ -113,19 +113,21 @@ export default function MonsterView() {
                       />
                     ) : null}
                     <section>
-                      <p>
-                        <b>Skills:</b>
-                        {(monster.proficiencies ?? []).map((p, index) =>
-                          p.proficiency.name.includes("Skill") ? (
-                            <span key={p.proficiency.name}>
-                              {p.proficiency.name.substring(p.proficiency.name.indexOf(" "))}{" "}
-                              {p.value > 0 ? "+" : ""}
-                              {p.value}
-                              {index !== (monster.proficiencies ?? []).length - 1 ? ", " : ""}
-                            </span>
-                          ) : null
-                        )}
-                      </p>
+                      {monster.proficiencies && monster.proficiencies.length ? (
+                        <p>
+                          <b>Skills:</b>
+                          {(monster.proficiencies ?? []).map((p, index) =>
+                            p.proficiency.name.includes("Skill") ? (
+                              <span key={p.proficiency.name}>
+                                {p.proficiency.name.substring(p.proficiency.name.indexOf(" "))}{" "}
+                                {p.value > 0 ? "+" : ""}
+                                {p.value}
+                                {index !== (monster.proficiencies ?? []).length - 1 ? ", " : ""}
+                              </span>
+                            ) : null
+                          )}
+                        </p>
+                      ) : null}
                       <p>
                         <b>Senses:</b>{" "}
                         {monster.senses.darkvision
