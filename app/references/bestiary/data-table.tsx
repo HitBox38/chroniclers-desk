@@ -15,12 +15,14 @@ import { LoaderPinwheelIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
 
 export default function DataTable() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const search = searchParams.get("search");
+  const { user } = useUser();
   const filters: Record<string, string> = {};
   searchParams.forEach((value, key) => {
     if (key !== "search" && key !== "monsterId") {
@@ -31,6 +33,7 @@ export default function DataTable() {
   const monsters = useQuery(api.monsters.get, {
     search: search ?? undefined,
     filters,
+    userId: user?.id,
   });
 
   const table = useReactTable({

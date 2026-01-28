@@ -2,11 +2,29 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MonsterBase } from "./type";
+import { Badge } from "@/components/ui/badge";
 
-export const columns: ColumnDef<MonsterBase>[] = [
+interface MonsterWithUserFlag extends MonsterBase {
+  isUserCreated?: boolean;
+}
+
+export const columns: ColumnDef<MonsterWithUserFlag>[] = [
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ row }) => {
+      const { name, isUserCreated } = row.original;
+      return (
+        <div className="flex items-center gap-2">
+          <span>{name}</span>
+          {isUserCreated && (
+            <Badge variant="secondary" className="text-xs">
+              Custom
+            </Badge>
+          )}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "type",

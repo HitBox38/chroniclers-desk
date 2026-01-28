@@ -20,14 +20,16 @@ import { cn } from "@/lib/utils";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { LoaderPinwheelIcon } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 
 export default function MonsterView() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const monsterId = params.get("monsterId");
+  const { user } = useUser();
 
-  const monster = useQuery(api.monsters.getById, monsterId ? { id: monsterId } : "skip");
+  const monster = useQuery(api.monsters.getById, monsterId ? { id: monsterId, userId: user?.id } : "skip");
 
   const isLoading = !!monsterId && monster === undefined;
 
