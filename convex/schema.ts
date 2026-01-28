@@ -269,9 +269,13 @@ export default defineSchema({
     specialAbilities: v.optional(v.array(specialAbilityObject)),
     reactions: v.optional(v.array(reactionObject)),
     forms: v.optional(v.array(referenceObject)),
+    // New field for user-created monsters
+    userId: v.optional(v.string()),
+    isUserCreated: v.optional(v.boolean()),
   })
     .index("by_name", ["name"])
     .index("by_string_id", ["id"])
+    .index("by_user_id", ["userId"])
     .searchIndex("search_name", {
       searchField: "name",
     })

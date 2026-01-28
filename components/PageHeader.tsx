@@ -48,14 +48,16 @@ export function PageHeader({
           </div>
         </div>
 
-        {/* Page Title and Description */}
-        <div className="flex flex-col gap-2">
-          {title && <h1 className="text-3xl font-bold tracking-tight">{title}</h1>}
-          {description && <p className="text-muted-foreground text-lg">{description}</p>}
-        </div>
+        <div className="flex flex-row justify-between">
+          {/* Page Title and Description */}
+          <div className="flex flex-col gap-2">
+            {title && <h1 className="text-3xl font-bold tracking-tight">{title}</h1>}
+            {description && <p className="text-muted-foreground text-lg">{description}</p>}
+          </div>
 
-        {/* Additional content */}
-        {children && <div className="mt-6">{children}</div>}
+          {/* Additional content */}
+          {children && <div className="mt-6">{children}</div>}
+        </div>
       </div>
     </header>
   );

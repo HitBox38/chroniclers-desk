@@ -76,8 +76,15 @@ export default function MonsterView() {
                           <b>Armor Class: </b>
                           {monster.armorClass.map((ac, index) => (
                             <span key={ac.type}>
-                              {ac.value} ({ac.type})
-                              {index !== monster?.armorClass.length - 1 ? ", " : ""}
+                              {ac.value} (
+                              {ac.type === "condition"
+                                ? ac.condition?.name
+                                : ac.type === "spell"
+                                ? `with ${ac.spell?.name}`
+                                : ac.type === "armor"
+                                ? ac.armor?.map((a) => a.name).join(", ")
+                                : ac.type}
+                              ){index !== monster?.armorClass.length - 1 ? ", " : ""}
                             </span>
                           ))}
                         </p>
@@ -113,19 +120,21 @@ export default function MonsterView() {
                       />
                     ) : null}
                     <section>
-                      <p>
-                        <b>Skills:</b>
-                        {(monster.proficiencies ?? []).map((p, index) =>
-                          p.proficiency.name.includes("Skill") ? (
-                            <span key={p.proficiency.name}>
-                              {p.proficiency.name.substring(p.proficiency.name.indexOf(" "))}{" "}
-                              {p.value > 0 ? "+" : ""}
-                              {p.value}
-                              {index !== (monster.proficiencies ?? []).length - 1 ? ", " : ""}
-                            </span>
-                          ) : null
-                        )}
-                      </p>
+                      {monster.proficiencies && monster.proficiencies.length ? (
+                        <p>
+                          <b>Skills:</b>
+                          {(monster.proficiencies ?? []).map((p, index) =>
+                            p.proficiency.name.includes("Skill") ? (
+                              <span key={p.proficiency.name}>
+                                {p.proficiency.name.substring(p.proficiency.name.indexOf(" "))}{" "}
+                                {p.value > 0 ? "+" : ""}
+                                {p.value}
+                                {index !== (monster.proficiencies ?? []).length - 1 ? ", " : ""}
+                              </span>
+                            ) : null
+                          )}
+                        </p>
+                      ) : null}
                       <p>
                         <b>Senses:</b>{" "}
                         {monster.senses.darkvision
