@@ -7,9 +7,10 @@ import { FilterBadge } from "./components/FilterBadge";
 
 interface Props {
   properties?: string[];
+  selectedParamName?: string;
 }
 
-export const SearchBox = ({ properties }: Props) => {
+export const SearchBox = ({ properties, selectedParamName = "monsterId" }: Props) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -18,12 +19,12 @@ export const SearchBox = ({ properties }: Props) => {
   const filters = useMemo(() => {
     const newFilters: Record<string, string> = {};
     searchParams.forEach((value, key) => {
-      if (key !== "search" && key !== "monsterId") {
+      if (key !== "search" && key !== selectedParamName) {
         newFilters[key] = value;
       }
     });
     return newFilters;
-  }, [searchParams]);
+  }, [searchParams, selectedParamName]);
 
   const handleSearchChange = (value: string) => {
     setInputValue(value);
@@ -57,9 +58,9 @@ export const SearchBox = ({ properties }: Props) => {
     for (const [key, value] of Object.entries(newFilters)) {
       params.set(key, value);
     }
-    const monsterId = searchParams.get("monsterId");
-    if (monsterId) {
-      params.set("monsterId", monsterId);
+    const selectedId = searchParams.get(selectedParamName);
+    if (selectedId) {
+      params.set(selectedParamName, selectedId);
     }
     router.replace(`${pathname}?${params.toString()}`);
   };
