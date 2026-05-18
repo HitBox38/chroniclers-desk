@@ -10,6 +10,12 @@ export const get = query({
     filters: v.optional(v.record(v.string(), v.string())),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      return [];
+    }
+
     let monstersQuery;
 
     if (args.search) {
@@ -22,19 +28,24 @@ export const get = query({
 
     if (args.filters) {
       for (const [key, value] of Object.entries(args.filters)) {
-        monstersQuery = monstersQuery.filter((q) => q.eq(q.field(key as MonsterField), value));
+        monstersQuery = monstersQuery.filter((q) =>
+          q.eq(q.field(key as MonsterField), normalizeFilterValue(key, value))
+        );
       }
     }
 
     const monsters = await monstersQuery.collect();
 
-    return monsters.map((monster) => ({
-      id: monster.id,
-      name: monster.name,
-      type: monster.type,
-      size: monster.size,
-      hitPoints: monster.hitPoints,
-    }));
+    return monsters
+      .filter((monster) => canReadCustomMonster(monster, identity.subject))
+      .map((monster) => ({
+        id: monster.id,
+        name: monster.name,
+        type: monster.type,
+        subtype: monster.subtype,
+        size: monster.size,
+        hitPoints: monster.hitPoints,
+      }));
   },
 });
 
@@ -43,10 +54,21 @@ export const getById = query({
     id: v.string(),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      return null;
+    }
+
     const monster = await ctx.db
       .query("monsters")
       .filter((q) => q.eq(q.field("id"), args.id))
       .first();
+
+    if (!monster || !canReadCustomMonster(monster, identity.subject)) {
+      return null;
+    }
+
     return monster;
   },
 });
@@ -65,3 +87,16 @@ export const getProperties = query({
     return Array.from(keys);
   },
 });
+
+function canReadCustomMonster(monster: Doc<"monsters">, userId: string) {
+  return monster.isPublic === true || monster.createdByUserId === userId;
+}
+
+function normalizeFilterValue(key: string, value: string) {
+  if (key === "challengeRating" || key === "hitPoints" || key === "xp" || key === "proficiencyBonus") {
+    const parsedValue = Number(value);
+    return Number.isNaN(parsedValue) ? value : parsedValue;
+  }
+
+  return value;
+}
