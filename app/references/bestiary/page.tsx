@@ -1,17 +1,11 @@
 "use client";
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { PageHeader } from "@/components/PageHeader";
 import DataTable from "./data-table";
 import MonsterView from "./monsterView";
 import { useSearchParams } from "next/navigation";
 import { SearchBox } from "@/components/SearchBox";
 import { BESTIARY_FILTER_PROPERTIES } from "@/lib/bestiary/open5e";
-
-const SELECTED_BESTIARY_LAYOUT = {
-  "bestiary-list-panel": 50,
-  "bestiary-detail-panel": 50,
-};
 
 export default function Bestiary() {
   const searchParams = useSearchParams();
@@ -52,33 +46,21 @@ export default function Bestiary() {
       />
       {monsterId ? (
         // Two-panel layout when a monster is selected
-        <main className="mx-auto px-4 pt-6 h-[calc(100vh-200px)]">
-          <ResizablePanelGroup
-            id="bestiary-selected-layout"
-            direction="horizontal"
-            defaultLayout={SELECTED_BESTIARY_LAYOUT}
-            className="h-full">
-            <ResizablePanel
-              id="bestiary-list-panel"
-              defaultSize="50%"
-              minSize="25%"
-              className="flex flex-col min-h-0">
+        <main className="px-4 pt-6 h-[calc(100vh-200px)]">
+          <div className="grid h-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-4">
+            <section className="flex flex-col min-h-0">
               <SearchBox properties={BESTIARY_FILTER_PROPERTIES} />
               <div className="h-full overflow-hidden">
                 <DataTable />
               </div>
-            </ResizablePanel>
-            <ResizableHandle className="mx-4" withHandle />
-            <ResizablePanel
-              id="bestiary-detail-panel"
-              defaultSize="50%"
-              minSize="25%"
-              className="flex flex-col min-h-0">
+            </section>
+            <div className="w-px bg-border" aria-hidden="true" />
+            <section className="flex flex-col min-h-0">
               <div className="h-full overflow-hidden">
                 <MonsterView />
               </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+            </section>
+          </div>
         </main>
       ) : (
         <main className="px-4 pt-6 h-[calc(100vh-250px)]">
