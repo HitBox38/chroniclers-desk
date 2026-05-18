@@ -17,6 +17,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/convex/_generated/api";
 
 export default function DataTable() {
+  "use no memo";
+
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
