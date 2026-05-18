@@ -1,6 +1,12 @@
 "use client";
 
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useUser } from "@clerk/nextjs";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useQuery as useReactQuery } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -9,34 +15,80 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useQuery } from "convex/react";
+import { useQuery as useConvexQuery } from "convex/react";
 import { columns } from "./columns";
 import { LoaderPinwheelIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/convex/_generated/api";
+import { mergeBestiaryRows } from "@/lib/bestiary/open5e";
+import { useMemo } from "react";
+import type { MonsterBase } from "./type";
+
+interface Open5eListResponse {
+  results: MonsterBase[];
+}
+
+async function fetchOpen5eMonsters(search: string | undefined, filters: Record<string, string>) {
+  const params = new URLSearchParams();
+
+  if (search) {
+    params.set("search", search);
+  }
+
+  for (const [key, value] of Object.entries(filters)) {
+    params.set(key, value);
+  }
+
+  const response = await fetch(`/api/open5e/monsters?${params.toString()}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to load Open5e monsters.");
+  }
+
+  const data = (await response.json()) as Open5eListResponse;
+  return data.results;
+}
 
 export default function DataTable() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isLoaded, isSignedIn } = useUser();
   const search = searchParams.get("search");
-  const filters: Record<string, string> = {};
-  searchParams.forEach((value, key) => {
-    if (key !== "search" && key !== "monsterId") {
-      filters[key] = value;
-    }
-  });
+  const filters = useMemo(() => {
+    const nextFilters: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      if (key !== "search" && key !== "monsterId") {
+        nextFilters[key] = value;
+      }
+    });
+    return nextFilters;
+  }, [searchParams]);
 
-  const monsters = useQuery(api.monsters.get, {
-    search: search ?? undefined,
-    filters,
+  const open5eMonsters = useReactQuery({
+    queryKey: ["open5e-monsters", search, filters],
+    queryFn: () => fetchOpen5eMonsters(search ?? undefined, filters),
   });
+  const customMonsters = useConvexQuery(
+    api.monsters.get,
+    isLoaded && isSignedIn
+      ? {
+          search: search ?? undefined,
+          filters,
+        }
+      : "skip"
+  );
+  const monsters = open5eMonsters.data
+    ? mergeBestiaryRows(open5eMonsters.data, customMonsters ?? [])
+    : [];
+  const isLoading =
+    open5eMonsters.isPending || !isLoaded || (isSignedIn === true && customMonsters === undefined);
 
   // TanStack Table exposes function properties that React Compiler cannot memoize safely.
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data: monsters ?? [],
+    data: monsters,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -47,7 +99,7 @@ export default function DataTable() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  return monsters !== undefined ? (
+  return !isLoading ? (
     <div className="h-full flex flex-col">
       <ScrollArea className="h-full w-full rounded-md border">
         <div className="h-full w-full">
@@ -66,7 +118,13 @@ export default function DataTable() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? (
+              {open5eMonsters.isError ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    Unable to load Open5e creatures.
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}

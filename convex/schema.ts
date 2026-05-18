@@ -262,6 +262,8 @@ export default defineSchema({
     url: v.string(),
     desc: v.optional(v.string()),
     source: v.optional(v.string()),
+    createdByUserId: v.optional(v.string()),
+    isPublic: v.optional(v.boolean()),
     initiative: v.optional(v.number()),
     actions: v.optional(v.array(monsterActionObject)),
     legendaryActions: v.optional(v.array(legendaryActionObject)),
@@ -272,6 +274,8 @@ export default defineSchema({
   })
     .index("by_name", ["name"])
     .index("by_string_id", ["id"])
+    .index("by_created_by_user_id", ["createdByUserId"])
+    .index("by_is_public", ["isPublic"])
     .searchIndex("search_name", {
       searchField: "name",
     })

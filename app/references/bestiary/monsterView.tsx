@@ -18,18 +18,48 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TabsContent } from "@radix-ui/react-tabs";
 import { cn } from "@/lib/utils";
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useQuery as useConvexQuery } from "convex/react";
+import { useQuery as useReactQuery } from "@tanstack/react-query";
 import { LoaderPinwheelIcon } from "lucide-react";
+import { getOpen5eSlugFromId, isOpen5eMonsterId } from "@/lib/bestiary/open5e";
+import { useUser } from "@clerk/nextjs";
+import type { Monster } from "./type";
+
+async function fetchOpen5eMonster(monsterId: string) {
+  const slug = getOpen5eSlugFromId(monsterId);
+  const response = await fetch(`/api/open5e/monsters/${encodeURIComponent(slug)}`);
+
+  if (!response.ok) {
+    throw new Error("Failed to load Open5e monster.");
+  }
+
+  return (await response.json()) as Monster;
+}
 
 export default function MonsterView() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoaded, isSignedIn } = useUser();
   const monsterId = params.get("monsterId");
+  const isOpen5eMonster = monsterId ? isOpen5eMonsterId(monsterId) : false;
 
-  const monster = useQuery(api.monsters.getById, monsterId ? { id: monsterId } : "skip");
+  const open5eMonster = useReactQuery({
+    queryKey: ["open5e-monster", monsterId],
+    queryFn: () => fetchOpen5eMonster(monsterId!),
+    enabled: !!monsterId && isOpen5eMonster,
+  });
+  const customMonster = useConvexQuery(
+    api.monsters.getById,
+    monsterId && !isOpen5eMonster && isLoaded && isSignedIn ? { id: monsterId } : "skip"
+  );
+  const monster = isOpen5eMonster ? open5eMonster.data : customMonster;
 
-  const isLoading = !!monsterId && monster === undefined;
+  const isLoading =
+    !!monsterId &&
+    (isOpen5eMonster
+      ? open5eMonster.isPending
+      : !isLoaded || (isSignedIn === true && customMonster === undefined));
 
   const handleClose = () => {
     const newParams = new URLSearchParams(params);
@@ -42,6 +72,10 @@ export default function MonsterView() {
       {isLoading ? (
         <div className="h-full flex items-center justify-center">
           <LoaderPinwheelIcon className="animate-spin" />
+        </div>
+      ) : open5eMonster.isError ? (
+        <div className="h-full flex items-center justify-center text-muted-foreground">
+          Unable to load selected Open5e creature.
         </div>
       ) : monster ? (
         <Card className="h-full flex flex-col">
