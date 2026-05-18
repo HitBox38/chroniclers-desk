@@ -29,6 +29,8 @@ interface Open5eListResponse {
   results: MonsterBase[];
 }
 
+const EMPTY_BESTIARY_ROWS: MonsterBase[] = [];
+
 async function fetchOpen5eMonsters(search: string | undefined, filters: Record<string, string>) {
   const params = new URLSearchParams();
 
@@ -79,9 +81,13 @@ export default function DataTable() {
         }
       : "skip"
   );
-  const monsters = open5eMonsters.data
-    ? mergeBestiaryRows(open5eMonsters.data, customMonsters ?? [])
-    : [];
+  const monsters = useMemo(() => {
+    if (!open5eMonsters.data) {
+      return EMPTY_BESTIARY_ROWS;
+    }
+
+    return mergeBestiaryRows(open5eMonsters.data, customMonsters ?? EMPTY_BESTIARY_ROWS);
+  }, [customMonsters, open5eMonsters.data]);
   const isLoading =
     open5eMonsters.isPending || !isLoaded || (isSignedIn === true && customMonsters === undefined);
 
