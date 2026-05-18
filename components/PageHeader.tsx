@@ -1,9 +1,10 @@
-import { ReactNode } from "react";
+"use client";
+
+import type { ReactNode } from "react";
 import { BreadcrumbNavigation } from "./BreadcrumbNavigation";
 import { BreadcrumbItem as BreadcrumbItemType } from "./BreadcrumbNavigation/types";
 import { cn } from "@/lib/utils";
-import { SignInButton } from "@clerk/nextjs";
-import { SignedIn, SignedOut, SignUpButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 
 interface PageHeaderProps {
@@ -21,6 +22,8 @@ export function PageHeader({
   className,
   children,
 }: PageHeaderProps) {
+  const { isSignedIn } = useUser();
+
   return (
     <header
       className={cn(
@@ -32,7 +35,7 @@ export function PageHeader({
         <div className="mb-4 flex justify-between">
           <BreadcrumbNavigation items={breadcrumbItems} maxDisplayItems={4} className="text-sm" />
           <div className="flex gap-2">
-            <SignedOut>
+            {isSignedIn === false && (
               <div className="flex gap-2">
                 <SignInButton mode="modal">
                   <Button>Sign In</Button>
@@ -41,10 +44,10 @@ export function PageHeader({
                   <Button>Sign Up</Button>
                 </SignUpButton>
               </div>
-            </SignedOut>
-            <SignedIn>
+            )}
+            {isSignedIn && (
               <UserButton />
-            </SignedIn>
+            )}
           </div>
         </div>
 

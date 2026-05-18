@@ -32,7 +32,7 @@ import {
 
 import { useThemeStore } from "@/lib/stores/useThemeStore";
 import { useHistoryStore } from "@/lib/stores/useHistoryStore";
-import { SignedIn, SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 
 // Menu items.
 const items = [
@@ -82,6 +82,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useThemeStore();
   const { history, addToHistory } = useHistoryStore();
+  const { isSignedIn } = useUser();
 
   // Effect to track page visits
   useEffect(() => {
@@ -172,7 +173,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              <SignedIn>
+              {isSignedIn && (
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <SignOutButton>
@@ -183,7 +184,7 @@ export function AppSidebar() {
                     </SignOutButton>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              </SignedIn>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
