@@ -33,6 +33,8 @@ export default function DataTable() {
     filters,
   });
 
+  // TanStack Table exposes function properties that React Compiler cannot memoize safely.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: monsters ?? [],
     columns,

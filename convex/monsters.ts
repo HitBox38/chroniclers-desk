@@ -1,10 +1,13 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
+
+type MonsterField = Extract<keyof Doc<"monsters">, string>;
 
 export const get = query({
   args: {
     search: v.optional(v.string()),
-    filters: v.optional(v.any()),
+    filters: v.optional(v.record(v.string(), v.string())),
   },
   handler: async (ctx, args) => {
     let monstersQuery;
@@ -19,7 +22,7 @@ export const get = query({
 
     if (args.filters) {
       for (const [key, value] of Object.entries(args.filters)) {
-        monstersQuery = monstersQuery.filter((q) => q.eq(q.field(key as any), value as any));
+        monstersQuery = monstersQuery.filter((q) => q.eq(q.field(key as MonsterField), value));
       }
     }
 

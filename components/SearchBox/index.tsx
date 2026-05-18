@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { SearchInput } from "./components/SearchInput";
-import { useState, useEffect } from "react";
+import { useMemo, useState, type KeyboardEvent } from "react";
 import { FilterBadge } from "./components/FilterBadge";
 
 interface Props {
@@ -13,18 +13,16 @@ export const SearchBox = ({ properties }: Props) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [inputValue, setInputValue] = useState("");
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [inputValue, setInputValue] = useState(() => searchParams.get("search") || "");
 
-  useEffect(() => {
+  const filters = useMemo(() => {
     const newFilters: Record<string, string> = {};
     searchParams.forEach((value, key) => {
       if (key !== "search" && key !== "monsterId") {
         newFilters[key] = value;
       }
     });
-    setFilters(newFilters);
-    setInputValue(searchParams.get("search") || "");
+    return newFilters;
   }, [searchParams]);
 
   const handleSearchChange = (value: string) => {
@@ -34,12 +32,11 @@ export const SearchBox = ({ properties }: Props) => {
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       const parts = inputValue.split(":");
       if (parts.length === 2 && properties?.includes(parts[0])) {
         const newFilters = { ...filters, [parts[0]]: parts[1].trim() };
-        setFilters(newFilters);
         setInputValue("");
         updateUrl(null, newFilters);
       }
@@ -49,7 +46,6 @@ export const SearchBox = ({ properties }: Props) => {
   const removeFilter = (key: string) => {
     const newFilters = { ...filters };
     delete newFilters[key];
-    setFilters(newFilters);
     updateUrl(searchParams.get("search"), newFilters);
   };
 
