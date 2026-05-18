@@ -126,6 +126,12 @@ interface BuildOpen5eListUrlArgs {
   offset?: number;
 }
 
+interface BestiaryTableLoadingState {
+  isOpen5ePending: boolean;
+  isSignedIn: boolean | undefined;
+  customRowsLoaded: boolean;
+}
+
 const CHALLENGE_RATING_XP = new Map<number, number>([
   [0, 10],
   [0.125, 25],
@@ -275,6 +281,14 @@ export function mergeBestiaryRows(
   return [...open5eRows, ...convexRows].sort((left, right) =>
     left.name.localeCompare(right.name, undefined, { sensitivity: "base" })
   );
+}
+
+export function shouldShowBestiaryTableLoading({
+  isOpen5ePending,
+  isSignedIn,
+  customRowsLoaded,
+}: BestiaryTableLoadingState) {
+  return isOpen5ePending || (isSignedIn === true && !customRowsLoaded);
 }
 
 function normalizeOptionalString(value?: string | null) {

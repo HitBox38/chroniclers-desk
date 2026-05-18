@@ -5,6 +5,7 @@ import {
   buildOpen5eListUrl,
   isOpen5eMonsterId,
   mergeBestiaryRows,
+  shouldShowBestiaryTableLoading,
   toOpen5eMonster,
   toOpen5eMonsterBase,
 } from "./open5e.ts";
@@ -121,5 +122,16 @@ test("merges Open5e and Convex table rows in name order without changing ids", (
   assert.deepEqual(
     rows.map((row) => row.id),
     ["open5e:aboleth", "custom-1", "open5e:zombie"]
+  );
+});
+
+test("does not block signed-out Open5e rows while Clerk is still loading", () => {
+  assert.equal(
+    shouldShowBestiaryTableLoading({
+      isOpen5ePending: false,
+      isSignedIn: undefined,
+      customRowsLoaded: false,
+    }),
+    false
   );
 });

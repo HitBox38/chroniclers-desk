@@ -21,7 +21,7 @@ import { LoaderPinwheelIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/convex/_generated/api";
-import { mergeBestiaryRows } from "@/lib/bestiary/open5e";
+import { mergeBestiaryRows, shouldShowBestiaryTableLoading } from "@/lib/bestiary/open5e";
 import { useMemo } from "react";
 import type { MonsterBase } from "./type";
 
@@ -88,8 +88,11 @@ export default function DataTable() {
 
     return mergeBestiaryRows(open5eMonsters.data, customMonsters ?? EMPTY_BESTIARY_ROWS);
   }, [customMonsters, open5eMonsters.data]);
-  const isLoading =
-    open5eMonsters.isPending || !isLoaded || (isSignedIn === true && customMonsters === undefined);
+  const isLoading = shouldShowBestiaryTableLoading({
+    isOpen5ePending: open5eMonsters.isPending,
+    isSignedIn,
+    customRowsLoaded: customMonsters !== undefined,
+  });
 
   // TanStack Table exposes function properties that React Compiler cannot memoize safely.
   // eslint-disable-next-line react-hooks/incompatible-library
