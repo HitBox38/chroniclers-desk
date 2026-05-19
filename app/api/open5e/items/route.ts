@@ -4,13 +4,7 @@ import {
   toOpen5eItemBase,
   type Open5eItemListItem,
 } from "@/lib/items/open5e";
-
-interface Open5eItemListResponse {
-  next: string | null;
-  results: Open5eItemListItem[];
-}
-
-const MAX_OPEN5E_PAGES = 40;
+import { fetchOpen5eList, OPEN5E_CACHE_HEADERS, Open5eFetchError } from "@/lib/open5e/cache";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -18,25 +12,17 @@ export async function GET(request: Request) {
   const filters = Object.fromEntries(searchParams.entries());
   delete filters.search;
 
-  const items = [];
-  let nextUrl: string | null = buildOpen5eItemListUrl({ search, filters }).toString();
-  let pageCount = 0;
+  try {
+    const items = await fetchOpen5eList<Open5eItemListItem, ReturnType<typeof toOpen5eItemBase>>({
+      initialUrl: buildOpen5eItemListUrl({ search, filters }),
+      mapResult: toOpen5eItemBase,
+    });
 
-  while (nextUrl && pageCount < MAX_OPEN5E_PAGES) {
-    const response = await fetch(nextUrl, { next: { revalidate: 60 * 60 } });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: "Failed to load Open5e items." },
-        { status: response.status }
-      );
-    }
-
-    const page = (await response.json()) as Open5eItemListResponse;
-    items.push(...page.results.map(toOpen5eItemBase));
-    nextUrl = page.next;
-    pageCount += 1;
+    return NextResponse.json({ results: items }, { headers: OPEN5E_CACHE_HEADERS });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to load Open5e items." },
+      { status: error instanceof Open5eFetchError ? error.status : 502 }
+    );
   }
-
-  return NextResponse.json({ results: items });
 }

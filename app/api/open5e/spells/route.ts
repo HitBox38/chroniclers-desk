@@ -4,13 +4,7 @@ import {
   toOpen5eSpellBase,
   type Open5eSpellListItem,
 } from "@/lib/spells/open5e";
-
-interface Open5eSpellListResponse {
-  next: string | null;
-  results: Open5eSpellListItem[];
-}
-
-const MAX_OPEN5E_PAGES = 40;
+import { fetchOpen5eList, OPEN5E_CACHE_HEADERS, Open5eFetchError } from "@/lib/open5e/cache";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -18,22 +12,17 @@ export async function GET(request: Request) {
   const filters = Object.fromEntries(searchParams.entries());
   delete filters.search;
 
-  const spells = [];
-  let nextUrl: string | null = buildOpen5eSpellListUrl({ search, filters }).toString();
-  let pageCount = 0;
+  try {
+    const spells = await fetchOpen5eList<Open5eSpellListItem, ReturnType<typeof toOpen5eSpellBase>>({
+      initialUrl: buildOpen5eSpellListUrl({ search, filters }),
+      mapResult: toOpen5eSpellBase,
+    });
 
-  while (nextUrl && pageCount < MAX_OPEN5E_PAGES) {
-    const response = await fetch(nextUrl, { next: { revalidate: 60 * 60 } });
-
-    if (!response.ok) {
-      return NextResponse.json({ error: "Failed to load Open5e spells." }, { status: response.status });
-    }
-
-    const page = (await response.json()) as Open5eSpellListResponse;
-    spells.push(...page.results.map(toOpen5eSpellBase));
-    nextUrl = page.next;
-    pageCount += 1;
+    return NextResponse.json({ results: spells }, { headers: OPEN5E_CACHE_HEADERS });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to load Open5e spells." },
+      { status: error instanceof Open5eFetchError ? error.status : 502 }
+    );
   }
-
-  return NextResponse.json({ results: spells });
 }
